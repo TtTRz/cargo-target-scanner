@@ -238,4 +238,33 @@ impl I18n {
             Language::En => format!("Deleted {} items, {} failed: {}", count, fail_count, errors),
         }
     }
+
+    // Scanning progress overlay
+    pub fn scanning_title(lang: Language) -> &'static str {
+        match lang {
+            Language::Zh => "正在扫描文件系统...",
+            Language::En => "Scanning file system...",
+        }
+    }
+
+    pub fn scanning_projects_found(lang: Language) -> &'static str {
+        match lang {
+            Language::Zh => "个项目",
+            Language::En => "projects",
+        }
+    }
+
+    pub fn scanning_size_found(lang: Language) -> &'static str {
+        match lang {
+            Language::Zh => "target 占用",
+            Language::En => "target usage",
+        }
+    }
+
+    pub fn scanning_elapsed(lang: Language) -> &'static str {
+        match lang {
+            Language::Zh => "耗时",
+            Language::En => "elapsed",
+        }
+    }
 }

@@ -20,8 +20,12 @@ pub struct AppState {
     pub show_delete_confirm: bool,
     pub toast: Option<Toast>,
     pub language: Language,
+    pub scan_found_count: usize,
+    pub scan_found_size: u64,
+    pub scan_elapsed_secs: f64,
     shared_results: Option<Arc<Mutex<Vec<ProjectInfo>>>>,
     scan_done: Option<Arc<AtomicBool>>,
+    scan_start_time: Option<std::time::Instant>,
 }
 
 #[derive(Clone, Debug)]
@@ -47,8 +51,12 @@ impl AppState {
             show_delete_confirm: false,
             toast: None,
             language: Language::Zh,
+            scan_found_count: 0,
+            scan_found_size: 0,
+            scan_elapsed_secs: 0.0,
             shared_results: None,
             scan_done: None,
+            scan_start_time: None,
         }
     }
 
@@ -57,6 +65,10 @@ impl AppState {
         self.scanning = true;
         self.status_message = None;
         self.show_delete_confirm = false;
+        self.scan_found_count = 0;
+        self.scan_found_size = 0;
+        self.scan_elapsed_secs = 0.0;
+        self.scan_start_time = Some(std::time::Instant::now());
 
         let results = Arc::new(Mutex::new(Vec::<ProjectInfo>::new()));
         let done_flag = Arc::new(AtomicBool::new(false));
@@ -97,6 +109,7 @@ impl AppState {
                 self.scanning = false;
                 self.shared_results = None;
                 self.scan_done = None;
+                self.scan_start_time = None;
                 changed = true;
             }
         }
@@ -104,6 +117,14 @@ impl AppState {
         if changed {
             self.sort_projects();
         }
+
+        // Update scan progress stats
+        self.scan_found_count = self.projects.len();
+        self.scan_found_size = self.projects.iter().map(|p| p.target_size).sum();
+        if let Some(start) = self.scan_start_time {
+            self.scan_elapsed_secs = start.elapsed().as_secs_f64();
+        }
+
         changed
     }
 

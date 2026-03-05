@@ -1,167 +1,239 @@
 mod app;
+mod cli;
 mod i18n;
 mod model;
 mod scanner;
 mod ui;
 mod utils;
 
-use dioxus::prelude::*;
+use clap::Parser;
 
-use crate::app::{AppState, execute_delete};
-use crate::i18n::I18n;
-use crate::model::{SortBy, SortOrder};
-use crate::ui::{BottomPanel, ProjectList, TopPanel, STYLESHEET};
+/// Scan and clean up Rust project target directories
+#[derive(Parser)]
+#[command(name = "cargo-target-scanner", version, about)]
+struct Args {
+    /// Launch GUI mode
+    #[arg(long)]
+    gui: bool,
 
-fn main() {
-    LaunchBuilder::desktop().launch(App);
+    /// Scan root path (defaults to $HOME)
+    #[arg(short, long)]
+    path: Option<String>,
+
+    /// Enable interactive deletion (CLI defaults to scan-only)
+    #[arg(long)]
+    delete: bool,
+
+    /// Delete all found targets without prompting (CLI only)
+    #[arg(long)]
+    delete_all: bool,
+
+    /// Sort by name instead of size (CLI only)
+    #[arg(long)]
+    sort_name: bool,
 }
 
-#[component]
-fn App() -> Element {
-    let mut state = use_signal(|| AppState::new());
+fn main() {
+    let args = Args::parse();
 
-    let s = state.read();
-    let projects = s.projects.clone();
-    let filtered = s.filtered_indices();
-    let scanning = s.scanning;
-    let deleting = s.deleting;
-    let scan_root = s.scan_root.clone();
-    let search_filter = s.search_filter.clone();
-    let sort_by = s.sort_by;
-    let sort_order = s.sort_order;
-    let total_size = s.total_size();
-    let has_selection = s.has_any_selection();
-    let delete_size = s.total_delete_size();
-    let delete_desc = s.delete_description();
-    let status_message = s.status_message.clone();
-    let show_confirm = s.show_delete_confirm;
+    if args.gui {
+        run_gui();
+    } else {
+        cli::run(args.path, args.delete_all, args.delete, args.sort_name);
+    }
+}
+
+fn run_gui() {
+    use dioxus::prelude::*;
+
+    use crate::app::{AppState, execute_delete};
+    use crate::i18n::I18n;
+    use crate::model::{SortBy, SortOrder};
+    use crate::ui::{BottomPanel, ProjectList, TopPanel, STYLESHEET};
+
+    #[component]
+    fn App() -> Element {
+        let mut state = use_signal(|| AppState::new());
+
+        let s = state.read();
+        let projects = s.projects.clone();
+        let filtered = s.filtered_indices();
+        let scanning = s.scanning;
+        let deleting = s.deleting;
+        let scan_root = s.scan_root.clone();
+        let search_filter = s.search_filter.clone();
+        let sort_by = s.sort_by;
+        let sort_order = s.sort_order;
+        let total_size = s.total_size();
+        let has_selection = s.has_any_selection();
+        let delete_size = s.total_delete_size();
+        let delete_desc = s.delete_description();
+        let status_message = s.status_message.clone();
+        let show_confirm = s.show_delete_confirm;
     let project_count = s.projects.len();
     let toast = s.toast.clone();
     let language = s.language;
+    let scan_found_count = s.scan_found_count;
+    let scan_found_size = s.scan_found_size;
+    let scan_elapsed = s.scan_elapsed_secs;
     drop(s);
 
-    rsx! {
-        style { "{STYLESHEET}" }
-        div { class: "app",
-            TopPanel {
-                scan_root: scan_root,
-                scanning: scanning,
-                project_count: project_count,
-                language: language,
-                on_scan_root_change: move |val: String| {
-                    state.write().scan_root = val;
-                },
-                on_start_scan: move |_| {
-                    state.write().start_scan();
-                    spawn(async move {
-                        loop {
-                            tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-                            state.write().poll_results();
-                            if !state.read().scanning {
-                                break;
+        rsx! {
+            style { "{STYLESHEET}" }
+            div { class: "app",
+                TopPanel {
+                    scan_root: scan_root,
+                    scanning: scanning,
+                    project_count: project_count,
+                    language: language,
+                    on_scan_root_change: move |val: String| {
+                        state.write().scan_root = val;
+                    },
+                    on_start_scan: move |_| {
+                        state.write().start_scan();
+                        spawn(async move {
+                            loop {
+                                tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                                state.write().poll_results();
+                                if !state.read().scanning {
+                                    break;
+                                }
                             }
-                        }
-                    });
-                },
-                on_toggle_language: move |_| {
-                    let mut s = state.write();
-                    s.language = s.language.toggle();
-                },
-            }
-            ProjectList {
-                projects: projects,
-                filtered_indices: filtered,
-                scanning: scanning,
-                search_filter: search_filter,
-                sort_by: sort_by,
-                sort_order: sort_order,
-                language: language,
-                on_search_change: move |val: String| {
-                    state.write().search_filter = val;
-                },
-                on_sort_change: move |new_sort: SortBy| {
-                    let mut s = state.write();
-                    if s.sort_by == new_sort {
-                        s.sort_order = match s.sort_order {
-                            SortOrder::Asc => SortOrder::Desc,
-                            SortOrder::Desc => SortOrder::Asc,
-                        };
-                    } else {
-                        s.sort_by = new_sort;
-                        s.sort_order = if new_sort == SortBy::Size {
-                            SortOrder::Desc
+                        });
+                    },
+                    on_toggle_language: move |_| {
+                        let mut s = state.write();
+                        s.language = s.language.toggle();
+                    },
+                }
+                ProjectList {
+                    projects: projects,
+                    filtered_indices: filtered,
+                    scanning: scanning,
+                    search_filter: search_filter,
+                    sort_by: sort_by,
+                    sort_order: sort_order,
+                    language: language,
+                    on_search_change: move |val: String| {
+                        state.write().search_filter = val;
+                    },
+                    on_sort_change: move |new_sort: SortBy| {
+                        let mut s = state.write();
+                        if s.sort_by == new_sort {
+                            s.sort_order = match s.sort_order {
+                                SortOrder::Asc => SortOrder::Desc,
+                                SortOrder::Desc => SortOrder::Asc,
+                            };
                         } else {
-                            SortOrder::Asc
-                        };
-                    }
-                    s.sort_projects();
-                },
-                on_toggle_select: move |idx: usize| {
-                    let mut s = state.write();
-                    if let Some(p) = s.projects.get_mut(idx) {
-                        p.selected = !p.selected;
-                        if p.selected {
-                            for t in &mut p.build_targets {
-                                t.selected = false;
+                            s.sort_by = new_sort;
+                            s.sort_order = if new_sort == SortBy::Size {
+                                SortOrder::Desc
+                            } else {
+                                SortOrder::Asc
+                            };
+                        }
+                        s.sort_projects();
+                    },
+                    on_toggle_select: move |idx: usize| {
+                        let mut s = state.write();
+                        if let Some(p) = s.projects.get_mut(idx) {
+                            p.selected = !p.selected;
+                            if p.selected {
+                                for t in &mut p.build_targets {
+                                    t.selected = false;
+                                }
                             }
                         }
-                    }
-                },
-                on_toggle_target: move |(proj_idx, target_idx): (usize, usize)| {
-                    state.write().toggle_build_target(proj_idx, target_idx);
-                },
-            }
-            BottomPanel {
-                total_size: total_size,
-                has_selection: has_selection,
-                delete_size: delete_size,
-                delete_desc: delete_desc,
-                status_message: status_message,
-                show_confirm: show_confirm,
-                deleting: deleting,
-                language: language,
-                on_select_all: move |_| {
-                    state.write().toggle_select_all();
-                },
-                on_delete_click: move |_| {
-                    state.write().show_delete_confirm = true;
-                },
-                on_confirm_delete: move |_| {
-                    state.write().deleting = true;
-                    state.write().show_delete_confirm = false;
-                    let tasks = state.read().collect_delete_tasks();
-                    spawn(async move {
-                        let result = tokio::task::spawn_blocking(move || {
-                            execute_delete(tasks)
-                        }).await.unwrap();
-                        state.write().apply_delete_results(result);
-                        // Auto-dismiss toast after 3 seconds
-                        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
-                        state.write().toast = None;
-                    });
-                },
-                on_cancel_delete: move |_| {
-                    state.write().show_delete_confirm = false;
-                },
-            }
-            // Loading overlay during deletion
-            if deleting {
-                div { class: "loading-overlay",
-                    div { class: "loading-content",
-                        div { class: "loading-spinner" }
-                        div { class: "loading-text", "{I18n::deleting_loading(language)}" }
+                    },
+                    on_toggle_target: move |(proj_idx, target_idx): (usize, usize)| {
+                        state.write().toggle_build_target(proj_idx, target_idx);
+                    },
+                }
+                BottomPanel {
+                    total_size: total_size,
+                    has_selection: has_selection,
+                    delete_size: delete_size,
+                    delete_desc: delete_desc,
+                    status_message: status_message,
+                    show_confirm: show_confirm,
+                    deleting: deleting,
+                    language: language,
+                    on_select_all: move |_| {
+                        state.write().toggle_select_all();
+                    },
+                    on_delete_click: move |_| {
+                        state.write().show_delete_confirm = true;
+                    },
+                    on_confirm_delete: move |_| {
+                        state.write().deleting = true;
+                        state.write().show_delete_confirm = false;
+                        let tasks = state.read().collect_delete_tasks();
+                        spawn(async move {
+                            let result = tokio::task::spawn_blocking(move || {
+                                execute_delete(tasks)
+                            }).await.unwrap();
+                            state.write().apply_delete_results(result);
+                            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+                            state.write().toast = None;
+                        });
+                    },
+                    on_cancel_delete: move |_| {
+                        state.write().show_delete_confirm = false;
+                    },
+                }
+                if scanning {
+                    div { class: "scanning-overlay",
+                        div { class: "scanning-content",
+                            div { class: "scanning-animation",
+                                div { class: "scanning-ring" }
+                                div { class: "scanning-ring scanning-ring-2" }
+                                div { class: "scanning-ring scanning-ring-3" }
+                                div { class: "scanning-icon", "🔍" }
+                            }
+                            div { class: "scanning-title", "{I18n::scanning_title(language)}" }
+                            div { class: "scanning-stats",
+                                div { class: "scanning-stat",
+                                    span { class: "scanning-stat-value", "{scan_found_count}" }
+                                    span { class: "scanning-stat-label", "{I18n::scanning_projects_found(language)}" }
+                                }
+                                div { class: "scanning-stat-divider" }
+                                div { class: "scanning-stat",
+                                    span { class: "scanning-stat-value", "{crate::utils::format_size(scan_found_size)}" }
+                                    span { class: "scanning-stat-label", "{I18n::scanning_size_found(language)}" }
+                                }
+                                div { class: "scanning-stat-divider" }
+                                div { class: "scanning-stat",
+                                    span { class: "scanning-stat-value", "{scan_elapsed:.1}s" }
+                                    span { class: "scanning-stat-label", "{I18n::scanning_elapsed(language)}" }
+                                }
+                            }
+                            div { class: "scanning-dots",
+                                span { class: "scanning-dot" }
+                                span { class: "scanning-dot scanning-dot-2" }
+                                span { class: "scanning-dot scanning-dot-3" }
+                            }
+                        }
                     }
                 }
-            }
-            // Toast notification
-            if let Some(t) = &toast {
-                div {
-                    class: if t.is_error { "toast toast-error" } else { "toast toast-success" },
-                    onclick: move |_| { state.write().toast = None; },
-                    if t.is_error { "❌ " } else { "✅ " }
-                    "{t.message}"
+                if deleting {
+                    div { class: "loading-overlay",
+                        div { class: "loading-content",
+                            div { class: "loading-spinner" }
+                            div { class: "loading-text", "{I18n::deleting_loading(language)}" }
+                        }
+                    }
+                }
+                if let Some(t) = &toast {
+                    div {
+                        class: if t.is_error { "toast toast-error" } else { "toast toast-success" },
+                        onclick: move |_| { state.write().toast = None; },
+                        if t.is_error { "❌ " } else { "✅ " }
+                        "{t.message}"
+                    }
                 }
             }
         }
     }
+
+    LaunchBuilder::desktop().launch(App);
 }

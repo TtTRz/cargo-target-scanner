@@ -519,4 +519,169 @@ body {
 .project-list::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.25);
 }
+
+/* ========== Scanning Overlay ========== */
+.scanning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: scanning-bg-in 0.3s ease-out;
+}
+
+.scanning-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 36px 48px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    min-width: 320px;
+    animation: scanning-card-in 0.3s ease-out;
+}
+
+@keyframes scanning-bg-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scanning-card-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.scanning-animation {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanning-ring {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border: 3px solid transparent;
+    border-top-color: #07C160;
+    border-radius: 50%;
+    animation: scan-spin 1.2s linear infinite;
+}
+
+.scanning-ring-2 {
+    width: 60px;
+    height: 60px;
+    border-top-color: #10AEFF;
+    animation-duration: 1.8s;
+    animation-direction: reverse;
+}
+
+.scanning-ring-3 {
+    width: 40px;
+    height: 40px;
+    border-top-color: #FA9D3B;
+    animation-duration: 2.4s;
+}
+
+.scanning-icon {
+    font-size: 24px;
+    animation: scan-pulse 1.5s ease-in-out infinite;
+    z-index: 1;
+}
+
+@keyframes scan-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes scan-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.8; }
+}
+
+.scanning-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.scanning-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: rgba(7, 193, 96, 0.06);
+    border-radius: 10px;
+}
+
+.scanning-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.scanning-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #07C160;
+    font-variant-numeric: tabular-nums;
+}
+
+.scanning-stat-label {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.45);
+}
+
+.scanning-stat-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.scanning-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.scanning-dot {
+    width: 8px;
+    height: 8px;
+    background: #07C160;
+    border-radius: 50%;
+    animation: scan-bounce 1.4s ease-in-out infinite;
+}
+
+.scanning-dot-2 {
+    animation-delay: 0.2s;
+}
+
+.scanning-dot-3 {
+    animation-delay: 0.4s;
+}
+
+@keyframes scan-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
 "#;
