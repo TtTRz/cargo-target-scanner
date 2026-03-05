@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 
+use crate::i18n::{I18n, Language};
 use crate::model::{ProjectInfo, SortBy, SortOrder};
 use crate::utils::{format_size, size_color_class};
 
@@ -11,11 +12,13 @@ pub fn ProjectList(
     search_filter: String,
     sort_by: SortBy,
     sort_order: SortOrder,
+    language: Language,
     on_search_change: EventHandler<String>,
     on_sort_change: EventHandler<SortBy>,
     on_toggle_select: EventHandler<usize>,
     on_toggle_target: EventHandler<(usize, usize)>,
 ) -> Element {
+    let lang = language;
     let arrow = match sort_order {
         SortOrder::Asc => "↑",
         SortOrder::Desc => "↓",
@@ -26,27 +29,27 @@ pub fn ProjectList(
             span { "🔎" }
             input {
                 class: "search-input",
-                placeholder: "搜索项目名或路径...",
+                placeholder: "{I18n::search_placeholder(lang)}",
                 value: "{search_filter}",
                 oninput: move |e| on_search_change.call(e.value()),
             }
-            span { class: "sort-label", "排序:" }
+            span { class: "sort-label", "{I18n::sort_label(lang)}" }
             button {
                 class: if sort_by == SortBy::Size { "sort-btn active" } else { "sort-btn" },
                 onclick: move |_| on_sort_change.call(SortBy::Size),
-                "按大小"
+                "{I18n::sort_by_size(lang)}"
             }
             button {
                 class: if sort_by == SortBy::Name { "sort-btn active" } else { "sort-btn" },
                 onclick: move |_| on_sort_change.call(SortBy::Name),
-                "按名称"
+                "{I18n::sort_by_name(lang)}"
             }
             span { class: "sort-label", "{arrow}" }
         }
         div { class: "project-list",
             if filtered_indices.is_empty() && !scanning {
                 div { class: "empty-state",
-                    "点击「开始扫描」来查找 Rust 项目的 target 目录"
+                    "{I18n::empty_state(lang)}"
                 }
             }
             for idx in filtered_indices.iter() {
@@ -85,7 +88,7 @@ pub fn ProjectList(
                             }
                             if !targets.is_empty() {
                                 div { class: "build-targets",
-                                    span { class: "targets-label", "编译目标:" }
+                                    span { class: "targets-label", "{I18n::build_targets_label(lang)}" }
                                     for (ti, t) in targets.iter().enumerate() {
                                         {
                                             let t_name = t.name.clone();

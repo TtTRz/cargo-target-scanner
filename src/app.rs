@@ -3,6 +3,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use crate::i18n::{I18n, Language};
 use crate::model::{ProjectInfo, SortBy, SortOrder};
 use crate::scanner;
 use crate::utils::format_size;
@@ -18,6 +19,7 @@ pub struct AppState {
     pub status_message: Option<String>,
     pub show_delete_confirm: bool,
     pub toast: Option<Toast>,
+    pub language: Language,
     shared_results: Option<Arc<Mutex<Vec<ProjectInfo>>>>,
     scan_done: Option<Arc<AtomicBool>>,
 }
@@ -44,6 +46,7 @@ impl AppState {
             status_message: None,
             show_delete_confirm: false,
             toast: None,
+            language: Language::Zh,
             shared_results: None,
             scan_done: None,
         }
@@ -177,12 +180,13 @@ impl AppState {
             .filter(|t| t.selected)
             .count();
 
+        let lang = self.language;
         let mut parts = Vec::new();
         if whole > 0 {
-            parts.push(format!("{} 个整个 target 目录", whole));
+            parts.push(I18n::target_dirs_unit(lang, whole));
         }
         if targets > 0 {
-            parts.push(format!("{} 个编译目标", targets));
+            parts.push(I18n::build_targets_unit(lang, targets));
         }
         parts.join(" + ")
     }
@@ -289,18 +293,15 @@ impl AppState {
         self.show_delete_confirm = false;
 
         let has_errors = !result.errors.is_empty();
+        let lang = self.language;
         let message = if result.errors.is_empty() {
-            format!(
-                "删除成功！已删除 {} 项，释放 {}",
-                result.deleted_count,
-                format_size(result.deleted_size)
-            )
+            I18n::delete_success(lang, result.deleted_count, &format_size(result.deleted_size))
         } else {
-            format!(
-                "已删除 {} 项，{} 个失败: {}",
+            I18n::delete_partial(
+                lang,
                 result.deleted_count,
                 result.errors.len(),
-                result.errors.join("; ")
+                &result.errors.join("; "),
             )
         };
 

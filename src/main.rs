@@ -1,4 +1,5 @@
 mod app;
+mod i18n;
 mod model;
 mod scanner;
 mod ui;
@@ -7,6 +8,7 @@ mod utils;
 use dioxus::prelude::*;
 
 use crate::app::{AppState, execute_delete};
+use crate::i18n::I18n;
 use crate::model::{SortBy, SortOrder};
 use crate::ui::{BottomPanel, ProjectList, TopPanel, STYLESHEET};
 
@@ -35,6 +37,7 @@ fn App() -> Element {
     let show_confirm = s.show_delete_confirm;
     let project_count = s.projects.len();
     let toast = s.toast.clone();
+    let language = s.language;
     drop(s);
 
     rsx! {
@@ -44,6 +47,7 @@ fn App() -> Element {
                 scan_root: scan_root,
                 scanning: scanning,
                 project_count: project_count,
+                language: language,
                 on_scan_root_change: move |val: String| {
                     state.write().scan_root = val;
                 },
@@ -59,6 +63,10 @@ fn App() -> Element {
                         }
                     });
                 },
+                on_toggle_language: move |_| {
+                    let mut s = state.write();
+                    s.language = s.language.toggle();
+                },
             }
             ProjectList {
                 projects: projects,
@@ -67,6 +75,7 @@ fn App() -> Element {
                 search_filter: search_filter,
                 sort_by: sort_by,
                 sort_order: sort_order,
+                language: language,
                 on_search_change: move |val: String| {
                     state.write().search_filter = val;
                 },
@@ -110,6 +119,7 @@ fn App() -> Element {
                 status_message: status_message,
                 show_confirm: show_confirm,
                 deleting: deleting,
+                language: language,
                 on_select_all: move |_| {
                     state.write().toggle_select_all();
                 },
@@ -139,7 +149,7 @@ fn App() -> Element {
                 div { class: "loading-overlay",
                     div { class: "loading-content",
                         div { class: "loading-spinner" }
-                        div { class: "loading-text", "正在删除中，请稍候..." }
+                        div { class: "loading-text", "{I18n::deleting_loading(language)}" }
                     }
                 }
             }

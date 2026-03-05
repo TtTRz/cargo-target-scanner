@@ -6,11 +6,13 @@ pub const STYLESHEET: &str = r#"
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: #1a1a2e;
-    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #EDEDED;
+    color: rgba(0, 0, 0, 0.9);
     overflow: hidden;
     height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
 }
 
 .app {
@@ -19,11 +21,11 @@ body {
     height: 100vh;
 }
 
-/* Top Panel */
+/* ========== Top Panel (WeUI Navigation Bar) ========== */
 .top-panel {
-    padding: 12px 20px;
-    background: #16213e;
-    border-bottom: 1px solid #2a2a4a;
+    padding: 12px 16px;
+    background: #EDEDED;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     flex-shrink: 0;
 }
 
@@ -31,156 +33,184 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-lang {
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.6);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-lang:hover {
+    border-color: #07C160;
+    color: #07C160;
 }
 
 .title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #f0f0f0;
+    font-size: 17px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.9);
 }
 
 .scan-info {
-    font-size: 13px;
-    color: #888;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
 }
 
 .controls-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
-.scan-root {
-    font-family: monospace;
-    font-size: 13px;
-    color: #64b5f6;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.controls-row > span {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.5);
     white-space: nowrap;
 }
 
+/* ========== WeUI Buttons ========== */
 .btn {
-    padding: 6px 14px;
+    padding: 6px 16px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
-    transition: all 0.15s;
+    transition: opacity 0.15s;
     white-space: nowrap;
+    line-height: 1.4;
 }
 
 .btn:hover {
-    filter: brightness(1.15);
+    opacity: 0.85;
 }
 
 .btn:active {
-    transform: scale(0.97);
+    opacity: 0.7;
 }
 
 .btn-primary {
-    background: #3b82f6;
-    color: white;
+    background: #07C160;
+    color: #FFFFFF;
 }
 
 .btn-secondary {
-    background: #374151;
-    color: #d1d5db;
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .btn-danger {
-    background: #dc2626;
-    color: white;
+    background: #FA5151;
+    color: #FFFFFF;
 }
 
 .btn-danger:hover {
-    background: #ef4444;
+    opacity: 0.85;
 }
 
 .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
-    filter: none;
-    transform: none;
 }
 
+/* ========== WeUI Input ========== */
 .scan-root-input {
     flex: 1;
-    padding: 5px 10px;
-    background: #0f172a;
-    border: 1px solid #334155;
+    padding: 6px 12px;
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
-    color: #64b5f6;
-    font-family: monospace;
+    color: rgba(0, 0, 0, 0.9);
+    font-family: -apple-system, "SF Mono", "Menlo", monospace;
     font-size: 13px;
     outline: none;
+    transition: border-color 0.2s;
 }
 
 .scan-root-input:focus {
-    border-color: #3b82f6;
+    border-color: #07C160;
 }
 
-/* Toolbar */
+/* ========== Toolbar (WeUI SearchBar style) ========== */
 .toolbar {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 20px;
-    background: #1e293b;
-    border-bottom: 1px solid #2a2a4a;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #EDEDED;
     flex-shrink: 0;
 }
 
+.toolbar > span:first-child {
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 14px;
+}
+
 .search-input {
-    padding: 5px 10px;
-    background: #0f172a;
-    border: 1px solid #334155;
+    padding: 7px 12px;
+    background: #FFFFFF;
+    border: none;
     border-radius: 6px;
-    color: #e0e0e0;
-    font-size: 13px;
-    width: 260px;
+    color: rgba(0, 0, 0, 0.9);
+    font-size: 14px;
+    width: 240px;
     outline: none;
 }
 
-.search-input:focus {
-    border-color: #3b82f6;
+.search-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
 }
 
 .sort-label {
     font-size: 13px;
-    color: #888;
-    margin-left: 6px;
+    color: rgba(0, 0, 0, 0.5);
+    margin-left: 4px;
 }
 
 .sort-btn {
-    padding: 4px 10px;
-    border: 1px solid #334155;
+    padding: 4px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
-    background: transparent;
-    color: #9ca3af;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.5);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     transition: all 0.15s;
 }
 
 .sort-btn:hover {
-    border-color: #3b82f6;
-    color: #e0e0e0;
+    border-color: #07C160;
+    color: #07C160;
 }
 
 .sort-btn.active {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    color: white;
+    background: #07C160;
+    border-color: #07C160;
+    color: #FFFFFF;
 }
 
-/* Project List */
+/* ========== Project List (WeUI Cells) ========== */
 .project-list {
     flex: 1;
     overflow-y: auto;
-    padding: 10px 20px;
+    padding: 0;
+    background: #EDEDED;
 }
 
 .empty-state {
@@ -188,44 +218,47 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: #666;
+    color: rgba(0, 0, 0, 0.3);
     font-size: 15px;
 }
 
+/* ========== Project Card (WeUI Cell) ========== */
 .project-card {
     display: flex;
     flex-direction: column;
-    padding: 10px 14px;
-    margin-bottom: 6px;
-    background: #1e293b;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    transition: all 0.15s;
+    padding: 12px 16px;
+    background: #FFFFFF;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    transition: background 0.15s;
+}
+
+.project-card:first-child {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .project-card:hover {
-    border-color: #334155;
-    background: #243047;
+    background: #F7F7F7;
 }
 
 .project-card.selected {
-    background: #1e3a5f;
-    border-color: #3b82f6;
+    background: rgba(7, 193, 96, 0.06);
+    border-left: 3px solid #07C160;
 }
 
 .project-main-row {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
 }
 
 .project-card input[type="checkbox"] {
-    margin-top: 3px;
-    accent-color: #3b82f6;
-    width: 16px;
-    height: 16px;
+    margin-top: 2px;
+    accent-color: #07C160;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .project-info {
@@ -241,50 +274,51 @@ body {
 }
 
 .project-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #f0f0f0;
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.9);
 }
 
 .project-size {
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
 }
 
 .project-path {
-    font-family: monospace;
-    font-size: 11px;
-    color: #6b7280;
+    font-family: -apple-system, "SF Mono", "Menlo", monospace;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.4);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
+/* ========== Build Targets ========== */
 .build-targets {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid #2a2a4a;
-    margin-left: 26px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    margin-left: 30px;
 }
 
 .targets-label {
-    font-size: 11px;
-    color: #9ca3af;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.4);
 }
 
 .target-item {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 8px;
-    background: #0f172a;
-    border: 1px solid #334155;
+    padding: 3px 10px;
+    background: #F2F2F2;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.15s;
@@ -292,50 +326,50 @@ body {
 }
 
 .target-item:hover {
-    border-color: #3b82f6;
-    background: #1e293b;
+    border-color: #07C160;
+    background: rgba(7, 193, 96, 0.06);
 }
 
 .target-item.selected {
-    background: #1e3a5f;
-    border-color: #3b82f6;
+    background: rgba(7, 193, 96, 0.1);
+    border-color: #07C160;
 }
 
 .target-item input[type="checkbox"] {
-    width: 12px;
-    height: 12px;
-    accent-color: #3b82f6;
+    width: 13px;
+    height: 13px;
+    accent-color: #07C160;
     cursor: pointer;
 }
 
 .target-name {
-    color: #bfdbfe;
-    font-size: 11px;
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 12px;
 }
 
 .target-size {
-    color: #9ca3af;
-    font-size: 10px;
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 11px;
     margin-left: 2px;
 }
 
-/* Size Colors */
-.size-green { color: #4ade80; }
-.size-yellow { color: #facc15; }
-.size-orange { color: #fb923c; }
-.size-red { color: #f87171; }
+/* ========== Size Colors (WeUI tinted) ========== */
+.size-green { color: #07C160; }
+.size-yellow { color: #EDA20C; }
+.size-orange { color: #FA9D3B; }
+.size-red { color: #FA5151; }
 
-/* Bottom Panel */
+/* ========== Bottom Panel (WeUI Tabbar style) ========== */
 .bottom-panel {
-    padding: 10px 20px;
-    background: #16213e;
-    border-top: 1px solid #2a2a4a;
+    padding: 10px 16px;
+    background: #FFFFFF;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     flex-shrink: 0;
 }
 
 .status-msg {
     font-size: 13px;
-    color: #4ade80;
+    color: #07C160;
     margin-bottom: 6px;
 }
 
@@ -353,13 +387,13 @@ body {
 
 .total-size {
     font-size: 15px;
-    font-weight: 700;
-    color: #f0f0f0;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.9);
 }
 
 .selected-info {
     font-size: 13px;
-    color: #facc15;
+    color: #FA9D3B;
 }
 
 .actions {
@@ -370,15 +404,16 @@ body {
 
 .confirm-text {
     font-size: 13px;
-    color: #f87171;
-    font-weight: 600;
+    color: #FA5151;
+    font-weight: 500;
 }
 
+/* ========== Spinner (WeUI Loading) ========== */
 .spinner {
     display: inline-block;
     width: 14px;
     height: 14px;
-    border: 2px solid #3b82f6;
+    border: 2px solid #07C160;
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -390,100 +425,98 @@ body {
     to { transform: rotate(360deg); }
 }
 
-/* Loading Overlay */
+/* ========== Loading Overlay (WeUI Loading Toast) ========== */
 .loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(2px);
 }
 
 .loading-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
-    padding: 32px 48px;
-    background: #1e293b;
+    gap: 12px;
+    padding: 28px 36px;
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 12px;
-    border: 1px solid #334155;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    min-width: 120px;
 }
 
 .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #334155;
-    border-top-color: #3b82f6;
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #FFFFFF;
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 .loading-text {
     font-size: 14px;
-    color: #94a3b8;
+    color: #FFFFFF;
+    white-space: nowrap;
 }
 
-/* Toast Notification */
+/* ========== Toast (WeUI Toast) ========== */
 .toast {
     position: fixed;
-    top: 20px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 24px;
+    transform: translate(-50%, -50%);
+    padding: 16px 24px;
     border-radius: 8px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
     z-index: 2000;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    animation: toast-in 0.3s ease-out;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    animation: weui-fade-in 0.2s ease-out;
     max-width: 80%;
     text-align: center;
+    line-height: 1.6;
 }
 
 .toast-success {
-    background: #065f46;
-    color: #a7f3d0;
-    border: 1px solid #10b981;
+    background: rgba(0, 0, 0, 0.8);
+    color: #FFFFFF;
 }
 
 .toast-error {
-    background: #7f1d1d;
-    color: #fca5a5;
-    border: 1px solid #ef4444;
+    background: rgba(0, 0, 0, 0.8);
+    color: #FFFFFF;
 }
 
-@keyframes toast-in {
+@keyframes weui-fade-in {
     from {
         opacity: 0;
-        transform: translateX(-50%) translateY(-20px);
+        transform: translate(-50%, -50%) scale(0.9);
     }
     to {
         opacity: 1;
-        transform: translateX(-50%) translateY(0);
+        transform: translate(-50%, -50%) scale(1);
     }
 }
 
-/* Scrollbar */
+/* ========== Scrollbar (subtle) ========== */
 .project-list::-webkit-scrollbar {
-    width: 8px;
+    width: 4px;
 }
 .project-list::-webkit-scrollbar-track {
-    background: #1a1a2e;
+    background: transparent;
 }
 .project-list::-webkit-scrollbar-thumb {
-    background: #374151;
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 2px;
 }
 .project-list::-webkit-scrollbar-thumb:hover {
-    background: #4b5563;
+    background: rgba(0, 0, 0, 0.25);
 }
 "#;
