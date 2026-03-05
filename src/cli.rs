@@ -7,21 +7,23 @@ use std::time::Instant;
 use crate::scanner;
 use crate::utils::format_size;
 
-// ANSI color codes
+// ANSI color codes — aligned with WeUI official color specification
+// --weui-BRAND: #07C160 (green), --weui-RED: #FA5151, --weui-ORANGE: #FA9D3B
+// --weui-YELLOW: #FFC300, --weui-BLUE: #10AEFF, --weui-LINK: #576B95
 const RESET: &str = "\x1b[0m";
 const BOLD: &str = "\x1b[1m";
 const DIM: &str = "\x1b[2m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const RED: &str = "\x1b[31m";
-const CYAN: &str = "\x1b[36m";
-const BOLD_GREEN: &str = "\x1b[1;32m";
-const BOLD_YELLOW: &str = "\x1b[1;33m";
-const BOLD_RED: &str = "\x1b[1;31m";
-const BOLD_CYAN: &str = "\x1b[1;36m";
-const BOLD_MAGENTA: &str = "\x1b[1;35m";
-const ORANGE: &str = "\x1b[38;5;208m";
-const BOLD_ORANGE: &str = "\x1b[1;38;5;208m";
+const GREEN: &str = "\x1b[38;2;7;193;96m";           // #07C160 --weui-BRAND
+const YELLOW: &str = "\x1b[38;2;255;195;0m";          // #FFC300 --weui-YELLOW
+const RED: &str = "\x1b[38;2;250;81;81m";              // #FA5151 --weui-RED
+const CYAN: &str = "\x1b[38;2;16;174;255m";            // #10AEFF --weui-BLUE
+const BOLD_GREEN: &str = "\x1b[1;38;2;7;193;96m";     // #07C160
+const BOLD_YELLOW: &str = "\x1b[1;38;2;255;195;0m";   // #FFC300
+const BOLD_RED: &str = "\x1b[1;38;2;250;81;81m";      // #FA5151
+const BOLD_CYAN: &str = "\x1b[1;38;2;16;174;255m";    // #10AEFF
+const BOLD_MAGENTA: &str = "\x1b[1;38;2;87;107;149m"; // #576B95 --weui-LINK
+const ORANGE: &str = "\x1b[38;2;250;157;59m";          // #FA9D3B --weui-ORANGE
+const BOLD_ORANGE: &str = "\x1b[1;38;2;250;157;59m";  // #FA9D3B
 
 const MB: u64 = 1024 * 1024;
 const GB: u64 = 1024 * MB;
@@ -264,10 +266,12 @@ fn truncate(s: &str, max_len: usize) -> String {
 fn scan_with_progress(scan_root: &PathBuf) -> Vec<crate::model::ProjectInfo> {
     let results = Arc::new(Mutex::new(Vec::<crate::model::ProjectInfo>::new()));
     let done_flag = Arc::new(AtomicBool::new(false));
+    let cancel_flag = Arc::new(AtomicBool::new(false));
     let skip_dirs = scanner::default_skip_dirs();
 
     let results_clone = results.clone();
     let done_clone = done_flag.clone();
+    let cancel_clone = cancel_flag.clone();
     let root = scan_root.clone();
 
     std::thread::spawn(move || {
@@ -275,6 +279,7 @@ fn scan_with_progress(scan_root: &PathBuf) -> Vec<crate::model::ProjectInfo> {
             &root,
             &results_clone,
             &done_clone,
+            &cancel_clone,
             &skip_dirs,
         );
     });

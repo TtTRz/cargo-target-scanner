@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 use std::fs;
+#[cfg(unix)]
+use std::os::unix::fs::MetadataExt;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -10,17 +12,22 @@ pub fn scan_directory_collect(
     dir: &Path,
     results: &Arc<Mutex<Vec<ProjectInfo>>>,
     done_flag: &Arc<AtomicBool>,
+    cancel_flag: &Arc<AtomicBool>,
     skip_dirs: &HashSet<&str>,
 ) {
-    scan_recursive(dir, results, skip_dirs);
+    scan_recursive(dir, results, cancel_flag, skip_dirs);
     done_flag.store(true, Ordering::SeqCst);
 }
 
 fn scan_recursive(
     dir: &Path,
     results: &Arc<Mutex<Vec<ProjectInfo>>>,
+    cancel_flag: &Arc<AtomicBool>,
     skip_dirs: &HashSet<&str>,
 ) {
+    if cancel_flag.load(Ordering::Relaxed) {
+        return;
+    }
     let entries = match fs::read_dir(dir) {
         Ok(entries) => entries,
         Err(_) => return,
@@ -51,7 +58,7 @@ fn scan_recursive(
     if has_cargo_toml {
         let target_path = dir.join("target");
         if target_path.is_dir() {
-            let target_size = dir_size(&target_path);
+            let target_size = calc_dir_size(&target_path);
             if target_size > 0 {
                 let name = extract_project_name(dir);
                 let build_targets = find_build_targets(&target_path);
@@ -77,12 +84,12 @@ fn scan_recursive(
                 .map(|n| n.to_string_lossy().to_string())
                 .unwrap_or_default();
             if dir_name != "target" {
-                scan_recursive(subdir, results, skip_dirs);
+                scan_recursive(subdir, results, cancel_flag, skip_dirs);
             }
         }
     } else {
         for subdir in &subdirs {
-            scan_recursive(subdir, results, skip_dirs);
+            scan_recursive(subdir, results, cancel_flag, skip_dirs);
         }
     }
 }
@@ -138,7 +145,7 @@ fn find_build_targets(target_dir: &Path) -> Vec<BuildTarget> {
                     let entry_path = entry.path();
 
                     if matches!(name.as_str(), "debug" | "release") {
-                        let size = dir_size(&entry_path);
+                        let size = calc_dir_size(&entry_path);
                         targets.push(BuildTarget {
                             name,
                             path: entry_path,
@@ -152,7 +159,7 @@ fn find_build_targets(target_dir: &Path) -> Vec<BuildTarget> {
                         let has_profile = entry_path.join("debug").is_dir()
                             || entry_path.join("release").is_dir();
                         if has_profile {
-                            let size = dir_size(&entry_path);
+                            let size = calc_dir_size(&entry_path);
                             targets.push(BuildTarget {
                                 name,
                                 path: entry_path,
@@ -171,18 +178,70 @@ fn find_build_targets(target_dir: &Path) -> Vec<BuildTarget> {
 }
 
 pub fn calc_dir_size(path: &Path) -> u64 {
-    dir_size(path)
+    #[cfg(unix)]
+    {
+        let mut seen_inodes: HashSet<(u64, u64)> = HashSet::new();
+        dir_size(path, &mut seen_inodes)
+    }
+    #[cfg(not(unix))]
+    {
+        dir_size(path)
+    }
 }
 
+#[cfg(unix)]
+fn dir_size(path: &Path, seen_inodes: &mut HashSet<(u64, u64)>) -> u64 {
+    let mut total: u64 = 0;
+
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            // Use symlink_metadata to avoid following symlinks
+            let meta = match entry.path().symlink_metadata() {
+                Ok(m) => m,
+                Err(_) => continue,
+            };
+
+            // Skip symlinks entirely
+            if meta.file_type().is_symlink() {
+                continue;
+            }
+
+            if meta.is_dir() {
+                total += dir_size(&entry.path(), seen_inodes);
+            } else {
+                // Deduplicate hardlinks: skip if we've already counted this inode
+                let inode_key = (meta.dev(), meta.ino());
+                if meta.nlink() > 1 {
+                    if !seen_inodes.insert(inode_key) {
+                        continue; // Already counted
+                    }
+                }
+                total += meta.len();
+            }
+        }
+    }
+
+    total
+}
+
+#[cfg(not(unix))]
 fn dir_size(path: &Path) -> u64 {
     let mut total: u64 = 0;
 
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
-            let entry_path = entry.path();
-            if entry_path.is_dir() {
-                total += dir_size(&entry_path);
-            } else if let Ok(meta) = entry.metadata() {
+            let meta = match entry.path().symlink_metadata() {
+                Ok(m) => m,
+                Err(_) => continue,
+            };
+
+            if meta.file_type().is_symlink() {
+                continue;
+            }
+
+            if meta.is_dir() {
+                total += dir_size(&entry.path());
+            } else {
                 total += meta.len();
             }
         }

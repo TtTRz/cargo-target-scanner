@@ -48,14 +48,14 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.6);
+    color: rgba(0, 0, 0, 0.55);
     cursor: pointer;
     transition: all 0.15s;
 }
 
 .btn-lang:hover {
-    border-color: #07C160;
-    color: #07C160;
+    border-color: #576B95;
+    color: #576B95;
 }
 
 .title {
@@ -66,7 +66,7 @@ body {
 
 .scan-info {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.55);
     display: flex;
     align-items: center;
 }
@@ -79,7 +79,7 @@ body {
 
 .controls-row > span {
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.55);
     white-space: nowrap;
 }
 
@@ -158,7 +158,7 @@ body {
 }
 
 .toolbar > span:first-child {
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.55);
     font-size: 14px;
 }
 
@@ -179,7 +179,7 @@ body {
 
 .sort-label {
     font-size: 13px;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.55);
     margin-left: 4px;
 }
 
@@ -188,15 +188,15 @@ body {
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     background: #FFFFFF;
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(0, 0, 0, 0.55);
     cursor: pointer;
     font-size: 13px;
     transition: all 0.15s;
 }
 
 .sort-btn:hover {
-    border-color: #07C160;
-    color: #07C160;
+    border-color: #576B95;
+    color: #576B95;
 }
 
 .sort-btn.active {
@@ -218,7 +218,7 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
-    color: rgba(0, 0, 0, 0.3);
+    color: rgba(0, 0, 0, 0.3);   /* --weui-FG-2 */
     font-size: 15px;
 }
 
@@ -288,7 +288,7 @@ body {
 .project-path {
     font-family: -apple-system, "SF Mono", "Menlo", monospace;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.3);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -309,7 +309,7 @@ body {
 
 .targets-label {
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.3);
 }
 
 .target-item {
@@ -348,16 +348,16 @@ body {
 }
 
 .target-size {
-    color: rgba(0, 0, 0, 0.4);
+    color: rgba(0, 0, 0, 0.3);
     font-size: 11px;
     margin-left: 2px;
 }
 
-/* ========== Size Colors (WeUI tinted) ========== */
-.size-green { color: #07C160; }
-.size-yellow { color: #EDA20C; }
-.size-orange { color: #FA9D3B; }
-.size-red { color: #FA5151; }
+/* ========== Size Colors (WeUI official) ========== */
+.size-green { color: #07C160; }   /* --weui-BRAND */
+.size-yellow { color: #FFC300; }  /* --weui-YELLOW */
+.size-orange { color: #FA9D3B; }  /* --weui-ORANGE */
+.size-red { color: #FA5151; }     /* --weui-RED */
 
 /* ========== Bottom Panel (WeUI Tabbar style) ========== */
 .bottom-panel {
@@ -393,7 +393,7 @@ body {
 
 .selected-info {
     font-size: 13px;
-    color: #FA9D3B;
+    color: #FA9D3B;   /* --weui-ORANGE */
 }
 
 .actions {
@@ -644,7 +644,7 @@ body {
 
 .scanning-stat-label {
     font-size: 11px;
-    color: rgba(0, 0, 0, 0.45);
+    color: rgba(0, 0, 0, 0.55);  /* --weui-FG-1 */
 }
 
 .scanning-stat-divider {
@@ -683,5 +683,24 @@ body {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+.btn-stop-scan {
+    margin-top: 4px;
+    padding: 8px 28px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    color: rgba(0, 0, 0, 0.55);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-stop-scan:hover {
+    background: #FA5151;
+    border-color: #FA5151;
+    color: #FFFFFF;
 }
 "#;

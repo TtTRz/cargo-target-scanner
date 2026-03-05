@@ -267,4 +267,11 @@ impl I18n {
             Language::En => "elapsed",
         }
     }
+
+    pub fn btn_stop_scan(lang: Language) -> &'static str {
+        match lang {
+            Language::Zh => "终止扫描",
+            Language::En => "Stop Scan",
+        }
+    }
 }

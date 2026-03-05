@@ -212,6 +212,13 @@ fn run_gui() {
                                 span { class: "scanning-dot scanning-dot-2" }
                                 span { class: "scanning-dot scanning-dot-3" }
                             }
+                            button {
+                                class: "btn btn-stop-scan",
+                                onclick: move |_| {
+                                    state.write().cancel_scan();
+                                },
+                                "{I18n::btn_stop_scan(language)}"
+                            }
                         }
                     }
                 }

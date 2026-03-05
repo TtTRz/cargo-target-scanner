@@ -25,6 +25,7 @@ pub struct AppState {
     pub scan_elapsed_secs: f64,
     shared_results: Option<Arc<Mutex<Vec<ProjectInfo>>>>,
     scan_done: Option<Arc<AtomicBool>>,
+    scan_cancel: Option<Arc<AtomicBool>>,
     scan_start_time: Option<std::time::Instant>,
 }
 
@@ -56,6 +57,7 @@ impl AppState {
             scan_elapsed_secs: 0.0,
             shared_results: None,
             scan_done: None,
+            scan_cancel: None,
             scan_start_time: None,
         }
     }
@@ -72,17 +74,31 @@ impl AppState {
 
         let results = Arc::new(Mutex::new(Vec::<ProjectInfo>::new()));
         let done_flag = Arc::new(AtomicBool::new(false));
+        let cancel_flag = Arc::new(AtomicBool::new(false));
 
         self.shared_results = Some(results.clone());
         self.scan_done = Some(done_flag.clone());
+        self.scan_cancel = Some(cancel_flag.clone());
 
         let root = self.scan_root.clone();
 
         thread::spawn(move || {
             let skip_dirs = scanner::default_skip_dirs();
             let root_path = std::path::PathBuf::from(&root);
-            scanner::scan_directory_collect(&root_path, &results, &done_flag, &skip_dirs);
+            scanner::scan_directory_collect(&root_path, &results, &done_flag, &cancel_flag, &skip_dirs);
         });
+    }
+
+    pub fn cancel_scan(&mut self) {
+        if let Some(cancel) = &self.scan_cancel {
+            cancel.store(true, Ordering::SeqCst);
+        }
+        self.scanning = false;
+        self.shared_results = None;
+        self.scan_done = None;
+        self.scan_cancel = None;
+        self.scan_start_time = None;
+        self.sort_projects();
     }
 
     pub fn poll_results(&mut self) -> bool {
@@ -109,6 +125,7 @@ impl AppState {
                 self.scanning = false;
                 self.shared_results = None;
                 self.scan_done = None;
+                self.scan_cancel = None;
                 self.scan_start_time = None;
                 changed = true;
             }

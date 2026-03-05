@@ -28,13 +28,19 @@ A tool to scan, visualize, and clean up Rust project `target` directories, helpi
 - Rust 2024 edition (1.85+)
 - macOS / Linux / Windows
 
-## Build & Run
+## Installation
+
+### From crates.io
+
+```bash
+cargo install cargo-target-scanner
+```
+
+### From source
 
 ```bash
 git clone https://github.com/TtTRz/cargo-target-scanner.git
 cd cargo-target-scanner
-
-# Build release binary
 cargo build --release
 ```
 
