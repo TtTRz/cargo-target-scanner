@@ -31,7 +31,7 @@ A tool to scan, visualize, and clean up Rust project `target` directories, helpi
 ## Build & Run
 
 ```bash
-git clone https://github.com/romchung/cargo-target-scanner.git
+git clone https://github.com/TtTRz/cargo-target-scanner.git
 cd cargo-target-scanner
 
 # Build release binary
