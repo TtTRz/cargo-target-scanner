@@ -1,5 +1,5 @@
 use std::io::{self, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
@@ -257,7 +257,7 @@ fn truncate(s: &str, max_len: usize) -> String {
     }
 }
 
-fn scan_with_progress(scan_root: &PathBuf) -> Vec<crate::model::ProjectInfo> {
+fn scan_with_progress(scan_root: &Path) -> Vec<crate::model::ProjectInfo> {
     let results = Arc::new(Mutex::new(Vec::<crate::model::ProjectInfo>::new()));
     let done_flag = Arc::new(AtomicBool::new(false));
     let cancel_flag = Arc::new(AtomicBool::new(false));
@@ -266,7 +266,7 @@ fn scan_with_progress(scan_root: &PathBuf) -> Vec<crate::model::ProjectInfo> {
     let results_clone = results.clone();
     let done_clone = done_flag.clone();
     let cancel_clone = cancel_flag.clone();
-    let root = scan_root.clone();
+    let root = scan_root.to_path_buf();
 
     std::thread::spawn(move || {
         scanner::scan_directory_collect(
