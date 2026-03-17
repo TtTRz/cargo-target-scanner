@@ -1,11 +1,11 @@
 [package]
 name = "cargo-target-scanner"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["romchung"]
 description = "A desktop GUI tool to scan, visualize, and clean up Rust project target directories"
 license = "MIT"
-repository = "https://github.com/romchung/cargo-target-scanner"
+repository = "https://github.com/TtTRz/cargo-target-scanner"
 keywords = ["cargo", "target", "cleanup", "disk-space", "gui"]
 categories = ["development-tools", "filesystem"]
 
