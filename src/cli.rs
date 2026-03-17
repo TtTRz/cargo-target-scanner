@@ -13,17 +13,17 @@ use crate::utils::format_size;
 const RESET: &str = "\x1b[0m";
 const BOLD: &str = "\x1b[1m";
 const DIM: &str = "\x1b[2m";
-const GREEN: &str = "\x1b[38;2;7;193;96m";           // #07C160 --weui-BRAND
-const YELLOW: &str = "\x1b[38;2;255;195;0m";          // #FFC300 --weui-YELLOW
-const RED: &str = "\x1b[38;2;250;81;81m";              // #FA5151 --weui-RED
-const CYAN: &str = "\x1b[38;2;16;174;255m";            // #10AEFF --weui-BLUE
-const BOLD_GREEN: &str = "\x1b[1;38;2;7;193;96m";     // #07C160
-const BOLD_YELLOW: &str = "\x1b[1;38;2;255;195;0m";   // #FFC300
-const BOLD_RED: &str = "\x1b[1;38;2;250;81;81m";      // #FA5151
-const BOLD_CYAN: &str = "\x1b[1;38;2;16;174;255m";    // #10AEFF
+const GREEN: &str = "\x1b[38;2;7;193;96m"; // #07C160 --weui-BRAND
+const YELLOW: &str = "\x1b[38;2;255;195;0m"; // #FFC300 --weui-YELLOW
+const RED: &str = "\x1b[38;2;250;81;81m"; // #FA5151 --weui-RED
+const CYAN: &str = "\x1b[38;2;16;174;255m"; // #10AEFF --weui-BLUE
+const BOLD_GREEN: &str = "\x1b[1;38;2;7;193;96m"; // #07C160
+const BOLD_YELLOW: &str = "\x1b[1;38;2;255;195;0m"; // #FFC300
+const BOLD_RED: &str = "\x1b[1;38;2;250;81;81m"; // #FA5151
+const BOLD_CYAN: &str = "\x1b[1;38;2;16;174;255m"; // #10AEFF
 const BOLD_MAGENTA: &str = "\x1b[1;38;2;87;107;149m"; // #576B95 --weui-LINK
-const ORANGE: &str = "\x1b[38;2;250;157;59m";          // #FA9D3B --weui-ORANGE
-const BOLD_ORANGE: &str = "\x1b[1;38;2;250;157;59m";  // #FA9D3B
+const ORANGE: &str = "\x1b[38;2;250;157;59m"; // #FA9D3B --weui-ORANGE
+const BOLD_ORANGE: &str = "\x1b[1;38;2;250;157;59m"; // #FA9D3B
 
 const MB: u64 = 1024 * 1024;
 const GB: u64 = 1024 * MB;
@@ -61,13 +61,8 @@ pub fn run(path: Option<String>, delete_all: bool, delete: bool, sort_by_name: b
         .map(PathBuf::from)
         .unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from("/")));
 
-    println!(
-        "{BOLD_CYAN}🦀 Cargo Target Scanner{RESET}"
-    );
-    println!(
-        "{DIM}Scanning: {}{RESET}",
-        scan_root.display()
-    );
+    println!("{BOLD_CYAN}🦀 Cargo Target Scanner{RESET}");
+    println!("{DIM}Scanning: {}{RESET}", scan_root.display());
 
     let mut projects = scan_with_progress(&scan_root);
 
@@ -86,8 +81,8 @@ pub fn run(path: Option<String>, delete_all: bool, delete: bool, sort_by_name: b
 
     println!();
     println!(
-        "{BOLD}{:<4} {:<30} {:>12}  {}{RESET}",
-        "#", "Project", "Size", "Path"
+        "{BOLD}{:<4} {:<30} {:>12}  Path{RESET}",
+        "#", "Project", "Size"
     );
     println!("{DIM}{}{RESET}", "─".repeat(90));
 
@@ -102,11 +97,7 @@ pub fn run(path: Option<String>, delete_all: bool, delete: bool, sort_by_name: b
         );
         for t in &p.build_targets {
             let t_size = colored_sub_size(t.size);
-            println!(
-                "     {DIM}└──{RESET} {:<25} {:>24}",
-                t.name,
-                t_size
-            );
+            println!("     {DIM}└──{RESET} {:<25} {:>24}", t.name, t_size);
         }
     }
 
@@ -119,7 +110,9 @@ pub fn run(path: Option<String>, delete_all: bool, delete: bool, sort_by_name: b
     println!();
 
     if !delete_all && !delete {
-        println!("{CYAN}Scan only. Use --delete for interactive deletion, --delete-all to remove all.{RESET}");
+        println!(
+            "{CYAN}Scan only. Use --delete for interactive deletion, --delete-all to remove all.{RESET}"
+        );
         return;
     }
 
@@ -244,10 +237,11 @@ fn parse_selection(input: &str, max: usize) -> Vec<usize> {
                     }
                 }
             }
-        } else if let Ok(n) = part.parse::<usize>() {
-            if n >= 1 && n <= max {
-                result.push(n - 1);
-            }
+        } else if let Ok(n) = part.parse::<usize>()
+            && n >= 1
+            && n <= max
+        {
+            result.push(n - 1);
         }
     }
     result.sort();

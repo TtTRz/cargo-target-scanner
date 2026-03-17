@@ -85,7 +85,13 @@ impl AppState {
         thread::spawn(move || {
             let skip_dirs = scanner::default_skip_dirs();
             let root_path = std::path::PathBuf::from(&root);
-            scanner::scan_directory_collect(&root_path, &results, &done_flag, &cancel_flag, &skip_dirs);
+            scanner::scan_directory_collect(
+                &root_path,
+                &results,
+                &done_flag,
+                &cancel_flag,
+                &skip_dirs,
+            );
         });
     }
 
@@ -104,31 +110,29 @@ impl AppState {
     pub fn poll_results(&mut self) -> bool {
         let mut changed = false;
 
-        if let Some(results) = &self.shared_results {
-            if let Ok(mut list) = results.lock() {
-                if !list.is_empty() {
-                    self.projects.append(&mut *list);
-                    changed = true;
-                }
-            }
+        if let Some(results) = &self.shared_results
+            && let Ok(mut list) = results.lock()
+            && !list.is_empty()
+        {
+            self.projects.append(&mut *list);
+            changed = true;
         }
 
-        if let Some(done) = &self.scan_done {
-            if done.load(Ordering::SeqCst) {
-                if let Some(results) = &self.shared_results {
-                    if let Ok(mut list) = results.lock() {
-                        if !list.is_empty() {
-                            self.projects.append(&mut *list);
-                        }
-                    }
-                }
-                self.scanning = false;
-                self.shared_results = None;
-                self.scan_done = None;
-                self.scan_cancel = None;
-                self.scan_start_time = None;
-                changed = true;
+        if let Some(done) = &self.scan_done
+            && done.load(Ordering::SeqCst)
+        {
+            if let Some(results) = &self.shared_results
+                && let Ok(mut list) = results.lock()
+                && !list.is_empty()
+            {
+                self.projects.append(&mut *list);
             }
+            self.scanning = false;
+            self.shared_results = None;
+            self.scan_done = None;
+            self.scan_cancel = None;
+            self.scan_start_time = None;
+            changed = true;
         }
 
         if changed {
@@ -298,10 +302,7 @@ impl AppState {
         let mut targets_by_project: std::collections::HashMap<usize, Vec<usize>> =
             std::collections::HashMap::new();
         for ti in &result.deleted_target_indices {
-            targets_by_project
-                .entry(ti.0)
-                .or_default()
-                .push(ti.1);
+            targets_by_project.entry(ti.0).or_default().push(ti.1);
         }
         for (proj_idx, mut target_indices) in targets_by_project {
             target_indices.sort_unstable_by(|a, b| b.cmp(a));
@@ -333,7 +334,11 @@ impl AppState {
         let has_errors = !result.errors.is_empty();
         let lang = self.language;
         let message = if result.errors.is_empty() {
-            I18n::delete_success(lang, result.deleted_count, &format_size(result.deleted_size))
+            I18n::delete_success(
+                lang,
+                result.deleted_count,
+                &format_size(result.deleted_size),
+            )
         } else {
             I18n::delete_partial(
                 lang,
@@ -359,7 +364,11 @@ impl AppState {
                     true
                 } else {
                     p.name.to_lowercase().contains(&filter)
-                        || p.path.display().to_string().to_lowercase().contains(&filter)
+                        || p.path
+                            .display()
+                            .to_string()
+                            .to_lowercase()
+                            .contains(&filter)
                 }
             })
             .map(|(i, _)| i)

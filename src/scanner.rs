@@ -40,18 +40,19 @@ fn scan_recursive(
         let file_name = entry.file_name();
         let name = file_name.to_string_lossy();
 
-        if name == "Cargo.toml" {
-            if let Ok(ft) = entry.file_type() {
-                if ft.is_file() {
-                    has_cargo_toml = true;
-                }
-            }
+        if name == "Cargo.toml"
+            && let Ok(ft) = entry.file_type()
+            && ft.is_file()
+        {
+            has_cargo_toml = true;
         }
 
-        if let Ok(ft) = entry.file_type() {
-            if ft.is_dir() && !name.starts_with('.') && !skip_dirs.contains(name.as_ref()) {
-                subdirs.push(entry.path());
-            }
+        if let Ok(ft) = entry.file_type()
+            && ft.is_dir()
+            && !name.starts_with('.')
+            && !skip_dirs.contains(name.as_ref())
+        {
+            subdirs.push(entry.path());
         }
     }
 
@@ -118,12 +119,12 @@ fn extract_project_name(project_dir: &Path) -> String {
     if let Ok(content) = fs::read_to_string(&cargo_toml) {
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with("name") {
-                if let Some(val) = trimmed.split('=').nth(1) {
-                    let name = val.trim().trim_matches('"').trim_matches('\'');
-                    if !name.is_empty() {
-                        return name.to_string();
-                    }
+            if trimmed.starts_with("name")
+                && let Some(val) = trimmed.split('=').nth(1)
+            {
+                let name = val.trim().trim_matches('"').trim_matches('\'');
+                if !name.is_empty() {
+                    return name.to_string();
                 }
             }
         }
@@ -139,12 +140,27 @@ fn find_build_targets(target_dir: &Path) -> Vec<BuildTarget> {
 
     if let Ok(entries) = fs::read_dir(target_dir) {
         for entry in entries.flatten() {
-            if let Ok(ft) = entry.file_type() {
-                if ft.is_dir() {
-                    let name = entry.file_name().to_string_lossy().to_string();
-                    let entry_path = entry.path();
+            if let Ok(ft) = entry.file_type()
+                && ft.is_dir()
+            {
+                let name = entry.file_name().to_string_lossy().to_string();
+                let entry_path = entry.path();
 
-                    if matches!(name.as_str(), "debug" | "release") {
+                if matches!(name.as_str(), "debug" | "release") {
+                    let size = calc_dir_size(&entry_path);
+                    targets.push(BuildTarget {
+                        name,
+                        path: entry_path,
+                        size,
+                        selected: false,
+                    });
+                    continue;
+                }
+                // Cross-compilation targets like aarch64-apple-darwin
+                if name.contains('-') && !name.starts_with('.') && name != "tmp" {
+                    let has_profile =
+                        entry_path.join("debug").is_dir() || entry_path.join("release").is_dir();
+                    if has_profile {
                         let size = calc_dir_size(&entry_path);
                         targets.push(BuildTarget {
                             name,
@@ -152,21 +168,6 @@ fn find_build_targets(target_dir: &Path) -> Vec<BuildTarget> {
                             size,
                             selected: false,
                         });
-                        continue;
-                    }
-                    // Cross-compilation targets like aarch64-apple-darwin
-                    if name.contains('-') && !name.starts_with('.') && name != "tmp" {
-                        let has_profile = entry_path.join("debug").is_dir()
-                            || entry_path.join("release").is_dir();
-                        if has_profile {
-                            let size = calc_dir_size(&entry_path);
-                            targets.push(BuildTarget {
-                                name,
-                                path: entry_path,
-                                size,
-                                selected: false,
-                            });
-                        }
                     }
                 }
             }
@@ -211,10 +212,8 @@ fn dir_size(path: &Path, seen_inodes: &mut HashSet<(u64, u64)>) -> u64 {
             } else {
                 // Deduplicate hardlinks: skip if we've already counted this inode
                 let inode_key = (meta.dev(), meta.ino());
-                if meta.nlink() > 1 {
-                    if !seen_inodes.insert(inode_key) {
-                        continue; // Already counted
-                    }
+                if meta.nlink() > 1 && !seen_inodes.insert(inode_key) {
+                    continue; // Already counted
                 }
                 total += meta.len();
             }

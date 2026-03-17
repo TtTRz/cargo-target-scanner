@@ -49,11 +49,11 @@ fn run_gui() {
     use crate::app::{AppState, execute_delete};
     use crate::i18n::I18n;
     use crate::model::{SortBy, SortOrder};
-    use crate::ui::{BottomPanel, ProjectList, TopPanel, STYLESHEET};
+    use crate::ui::{BottomPanel, ProjectList, STYLESHEET, TopPanel};
 
     #[component]
     fn App() -> Element {
-        let mut state = use_signal(|| AppState::new());
+        let mut state = use_signal(AppState::new);
 
         let s = state.read();
         let projects = s.projects.clone();
@@ -70,13 +70,13 @@ fn run_gui() {
         let delete_desc = s.delete_description();
         let status_message = s.status_message.clone();
         let show_confirm = s.show_delete_confirm;
-    let project_count = s.projects.len();
-    let toast = s.toast.clone();
-    let language = s.language;
-    let scan_found_count = s.scan_found_count;
-    let scan_found_size = s.scan_found_size;
-    let scan_elapsed = s.scan_elapsed_secs;
-    drop(s);
+        let project_count = s.projects.len();
+        let toast = s.toast.clone();
+        let language = s.language;
+        let scan_found_count = s.scan_found_count;
+        let scan_found_size = s.scan_found_size;
+        let scan_elapsed = s.scan_elapsed_secs;
+        drop(s);
 
         rsx! {
             style { "{STYLESHEET}" }

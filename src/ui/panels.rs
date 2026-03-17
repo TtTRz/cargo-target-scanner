@@ -13,7 +13,7 @@ pub fn TopPanel(
     on_start_scan: EventHandler<()>,
     on_toggle_language: EventHandler<()>,
 ) -> Element {
-    let on_scan_root_change2 = on_scan_root_change.clone();
+    let on_scan_root_change2 = on_scan_root_change;
     let lang = language;
     rsx! {
         div { class: "top-panel",
@@ -46,7 +46,7 @@ pub fn TopPanel(
                     class: "btn btn-secondary",
                     disabled: scanning,
                     onclick: move |_| {
-                        let cb = on_scan_root_change2.clone();
+                        let cb = on_scan_root_change2;
                         let title = I18n::choose_dir_title(lang).to_string();
                         spawn(async move {
                             if let Some(folder) = rfd::AsyncFileDialog::new()
